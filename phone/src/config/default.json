@@ -25,6 +25,32 @@
     {
       "label": "Default",
       "value": "default.jpg"
+    },
+
+
+    {
+      "label": "Hopia Minimaliste",
+      "value": "hopia_minimalist.png"
+    },
+    {
+      "label": "Hopia Minimaliste coloré",
+      "value": "hopia_colored_minimalist.png"
+    },
+    {
+      "label": "Hopia Stylisé",
+      "value": "hopia_colored_stylize.png"
+    },
+    {
+      "label": "Hopia mer",
+      "value": "hopia_sea_minimaliste.png"
+    },
+    {
+      "label": "Hopia mer coloré",
+      "value": "hopia_sea_colored_minimaliste.png"
+    },
+    {
+      "label": "Hopia mer stylisé",
+      "value": "hopia_sea_stylize.png"
     }
   ],
   "frames": [
