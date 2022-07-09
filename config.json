@@ -32,6 +32,6 @@
     "allowDeleteTweets": false
   },
   "Match": {
-    "generateProfileNameFromUsers": false
+    "generateProfileNameFromUsers": true
   }
 }
