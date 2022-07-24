@@ -207,13 +207,15 @@
         phoneNumberColumn: "phone_number"
       };
       images = {
-        url: "https://api.imgur.com/3/image",
-        type: "imgur",
+        url: "https://api.projecterror.dev/image",
+        type: "pe_image",
         imageEncoding: "jpg",
         contentType: "multipart/form-data",
-        authorizationPrefix: "Client-ID",
+        useContentType: false,
+        authorizationHeader: "PE-Secret",
+        authorizationPrefix: "",
         useAuthorization: true,
-        returnedDataIndexes: ["data", "link"]
+        returnedDataIndexes: ["url"]
       };
       imageSafety = {
         filterUnsafeImageUrls: true,
@@ -226,7 +228,8 @@
           "tenor.com",
           "discord.com",
           "discordapp.com",
-          "wikipedia.org"
+          "wikipedia.org",
+          "i.projecterror.dev"
         ]
       };
       profanityFilter = {
@@ -831,7 +834,12 @@
       init_cl_config();
       init_animation_controller();
       init_cl_utils();
-      var SCREENSHOT_BASIC_TOKEN = GetConvar("SCREENSHOT_BASIC_TOKEN", "none");
+      var SCREENSHOT_BASIC_TOKEN;
+      setImmediate(() => {
+        ClUtils.emitNetPromise("npwd:getAuthToken" /* GET_AUTHORISATION_TOKEN */).then(({ data }) => {
+          SCREENSHOT_BASIC_TOKEN = data;
+        });
+      });
       var exp2 = global.exports;
       var inCameraMode = false;
       function closePhoneTemp() {
@@ -913,8 +921,8 @@
         exp2["screenshot-basic"].requestScreenshotUpload(config.images.url, config.images.type, {
           encoding: config.images.imageEncoding,
           headers: {
-            authorization: config.images.useAuthorization ? `${config.images.authorizationPrefix} ${SCREENSHOT_BASIC_TOKEN}` : void 0,
-            "content-type": config.images.contentType
+            [config.images.useAuthorization && config.images.authorizationHeader]: `${config.images.authorizationPrefix} ${SCREENSHOT_BASIC_TOKEN}`,
+            [config.images.useContentType && "Content-Type"]: config.images.contentType
           }
         }, (data) => __async(exports, null, function* () {
           try {
@@ -1051,7 +1059,7 @@
   });
 
   // resources/client/calls/cl_calls.service.ts
-  var exp, CallService;
+  var exp, CallService, callService;
   var init_cl_calls_service = __esm({
     "resources/client/calls/cl_calls.service.ts"() {
       init_cl_main();
@@ -1088,6 +1096,9 @@
         }
         isCurrentCall(tgtCall) {
           return this.currentCall === tgtCall;
+        }
+        getCurrentCall() {
+          return this.currentPendingCall;
         }
         isInPendingCall() {
           return !!this.currentPendingCall;
@@ -1164,6 +1175,7 @@
           });
         }
       };
+      callService = new CallService();
     }
   });
 
@@ -1182,7 +1194,7 @@
   });
 
   // resources/client/calls/cl_calls.controller.ts
-  var callService, initializeCallHandler;
+  var initializeCallHandler;
   var init_cl_calls_controller = __esm({
     "resources/client/calls/cl_calls.controller.ts"() {
       init_call();
@@ -1191,7 +1203,6 @@
       init_miscUtils();
       init_cl_utils();
       init_client();
-      callService = new CallService();
       initializeCallHandler = (data, cb) => __async(void 0, null, function* () {
         if (callService.isInCall())
           return;
@@ -1297,6 +1308,9 @@
       init_notes();
       init_cl_main();
       init_client();
+      init_cl_calls_service();
+      init_animation_controller();
+      init_call();
       var exps2 = global.exports;
       exps2("openApp", (app) => {
         verifyExportArgType("openApp", app, ["string"]);
@@ -1340,6 +1354,15 @@
           global.clientPhoneNumber = res.data;
         }
         return global.clientPhoneNumber;
+      }));
+      exps2("isInCall", () => {
+        return callService.isInCall();
+      });
+      exps2("endCall", () => __async(exports, null, function* () {
+        if (callService.isInCall()) {
+          CallService.sendCallAction("npwd:endCall" /* END_CALL */, null);
+          animationService.endPhoneCall();
+        }
       }));
     }
   });

@@ -87,13 +87,15 @@ var init_config_default = __esm({
       phoneNumberColumn: "phone_number"
     };
     images = {
-      url: "https://api.imgur.com/3/image",
-      type: "imgur",
+      url: "https://api.projecterror.dev/image",
+      type: "pe_image",
       imageEncoding: "jpg",
       contentType: "multipart/form-data",
-      authorizationPrefix: "Client-ID",
+      useContentType: false,
+      authorizationHeader: "PE-Secret",
+      authorizationPrefix: "",
       useAuthorization: true,
-      returnedDataIndexes: ["data", "link"]
+      returnedDataIndexes: ["url"]
     };
     imageSafety = {
       filterUnsafeImageUrls: true,
@@ -106,7 +108,8 @@ var init_config_default = __esm({
         "tenor.com",
         "discord.com",
         "discordapp.com",
-        "wikipedia.org"
+        "wikipedia.org",
+        "i.projecterror.dev"
       ]
     };
     profanityFilter = {
@@ -40095,6 +40098,12 @@ var init_photo_controller = __esm({
       photo_service_default.handleDeletePhoto(reqObj, resp).catch((e) => {
         photoLogger.error(`Error occurred in delete photo event (${reqObj.source}), Error: ${e.message}`);
         resp({ status: "error", errorMsg: "INTERNAL_ERROR" });
+      });
+    });
+    onNetPromise("npwd:getAuthToken" /* GET_AUTHORISATION_TOKEN */, (reqObj, resp) => {
+      resp({
+        status: "ok",
+        data: GetConvar("SCREENSHOT_BASIC_TOKEN", "none")
       });
     });
   }
